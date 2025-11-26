@@ -1,0 +1,102 @@
+// server/routes/game.js
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import User from '../models/User.js';
+
+const router = express.Router();
+
+// --- 1. OYUN DURUMUNU KAYDET (/api/game/save) ---
+// Oyun sırasında sürekli çağrılacak endpoint
+router.post(
+    '/save',
+    [
+        // Güvenlik: Client'tan gelen verileri kısıtla ve doğrula
+        body('tokens').isInt({ min: 0 }).withMessage('Token değeri pozitif tam sayı olmalı.'),
+        body('xp').isFloat({ min: 0 }).withMessage('XP değeri pozitif olmalı.'),
+        body('level').isInt({ min: 1 }).withMessage('Level en az 1 olmalı.'),
+        body('size').isFloat({ min: 20, max: 2000 }).withMessage('Boyut geçerli aralıkta olmalı.'),
+        body('speedUpgrade').isInt({ min: 0 }).withMessage('Hız yükseltme sayısı geçerli olmalı.'),
+        body('penaltyFactor').isFloat({ min: 0.0001, max: 0.005 }).withMessage('Ceza faktörü geçerli aralıkta olmalı.'),
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            // Hatalı veri gönderen client'ı logla (Anti-cheat ipucu)
+            console.warn(`[ANTI-CHEAT WARNING] Kullanıcı ID: ${req.userId} hatalı veri göndermeye çalıştı.`);
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            const { 
+                tokens, xp, level, size, 
+                speedUpgrade, penaltyFactor, 
+                skinColor 
+            } = req.body;
+
+            // Player'ın Token'ını direk Client'tan kabul etmek yerine, 
+            // Server-side Token/XP doğrulama mantığı (AntiCheatService) burada olmalıydı.
+            // Şimdilik sadece client'tan gelen veriyi güncelliyoruz, ancak bu noktayı unutmuyoruz.
+            const user = await User.findById(req.userId);
+
+            if (!user) {
+                return res.status(404).json({ message: 'Kullanıcı bulunamadı.' });
+            }
+
+            // Verileri güncelle
+            user.tokens = tokens;
+            user.xp = xp;
+            user.level = level;
+            user.size = size;
+            user.speedUpgrade = speedUpgrade;
+            user.penaltyFactor = penaltyFactor;
+            user.skinColor = skinColor || user.skinColor; // Renk isteğe bağlı
+            
+            await user.save();
+            
+            res.json({ message: 'Oyun durumu başarıyla kaydedildi.', tokens: user.tokens });
+
+        } catch (error) {
+            console.error('Oyun kaydetme hatası:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Kayıt yapılamadı.' });
+        }
+    }
+);
+
+// --- 2. LİDERLİK TABLOSU (/api/game/leaderboard) ---
+// En çok tokene sahip 10 oyuncuyu döner
+router.get('/leaderboard', async (req, res) => {
+    try {
+        const topPlayers = await User.find({ isBanned: false })
+            .select('username tokens level size skinColor') // Sadece gerekli alanları seç
+            .sort({ tokens: -1 }) // Token'a göre azalan sırada
+            .limit(10); // İlk 10 oyuncu
+
+        res.json(topPlayers);
+
+    } catch (error) {
+        console.error('Liderlik tablosu hatası:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Liderlik tablosu çekilemedi.' });
+    }
+});
+
+// --- 3. KULLANICI DETAYI (/api/game/me) ---
+// Oyun başlatıldığında player verilerini çekmek için kullanılır
+router.get('/me', async (req, res) => {
+    try {
+        const user = await User.findById(req.userId)
+            .select('-password -isAdmin -ipAddress -deviceId -suspiciousActivity -friendRequests -friends'); // Hassas bilgileri gönderme
+
+        if (!user) {
+            return res.status(404).json({ message: 'Kullanıcı bulunamadı.' });
+        }
+
+        res.json(user);
+
+    } catch (error) {
+        console.error('Kullanıcı verisi çekme hatası:', error);
+        res.status(500).json({ message: 'Sunucu hatası.' });
+    }
+});
+
+
+export default router;

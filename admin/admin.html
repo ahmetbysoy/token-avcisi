@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Avcısı Ultimate - Admin Paneli</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00ffcc;
+            --secondary: #ff33a1;
+            --bg-dark: #1e1e1e;
+            --bg-light: #2c2c2c;
+            --text-color: #f0f0f0;
+            --card-color: #383838;
+            --border-color: #555;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- Sidebar & Layout --- */
+        #app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        #sidebar {
+            width: 200px;
+            background-color: var(--bg-light);
+            padding: 20px 10px;
+            border-right: 1px solid var(--border-color);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar h2 {
+            color: var(--primary);
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            padding: 15px 10px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s, color 0.2s;
+            border-radius: 5px;
+        }
+
+        .nav-btn.active, .nav-btn:hover {
+            background-color: var(--card-color);
+            color: var(--primary);
+        }
+
+        .nav-btn i {
+            margin-right: 10px;
+        }
+
+        #main-content {
+            flex-grow: 1;
+            padding: 30px;
+        }
+
+        /* --- Card Styles --- */
+        .dashboard-cards {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background-color: var(--card-color);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.1em;
+            color: var(--primary);
+        }
+
+        .card p {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0 0;
+            color: var(--secondary);
+        }
+        
+        /* --- Table Styles --- */
+        .content-section h2 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--bg-light);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background-color: var(--card-color);
+            color: var(--primary);
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        .data-table tr:hover {
+            background-color: #444;
+        }
+
+        /* --- Form & Button Styles --- */
+        #login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-content {
+            background: var(--bg-light);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            width: 350px;
+            text-align: center;
+        }
+
+        .login-content input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 5px;
+        }
+
+        .action-btn, .modal-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        .action-btn:hover, .modal-btn:hover { opacity: 0.8; }
+        
+        .btn-edit { background-color: #3498db; color: white; }
+        .btn-ban { background-color: var(--danger); color: white; }
+        .btn-unban { background-color: var(--success); color: white; }
+        .btn-primary { background-color: var(--primary); color: var(--bg-dark); }
+        .btn-close { background-color: var(--danger); color: white; margin-top: 15px; }
+
+        .status-banned { color: var(--danger); font-weight: bold; }
+        .status-active { color: var(--success); }
+        
+        /* --- Modal for Editing --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1010;
+        }
+
+        .modal-content {
+            background: var(--bg-light);
+            padding: 30px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .modal-content label { display: block; margin-top: 10px; color: var(--primary); }
+        .modal-content input, .modal-content textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-modal">
+        <div class="login-content">
+            <h2>Admin Girişi</h2>
+            <p id="login-error" style="color:var(--danger); margin-bottom: 10px;"></p>
+            <input type="text" id="admin-username" placeholder="Kullanıcı Adı">
+            <input type="password" id="admin-password" placeholder="Şifre">
+            <button class="modal-btn btn-primary" onclick="handleLogin()">Giriş Yap</button>
+        </div>
+    </div>
+
+    <div id="app-container" style="display: none;">
+        
+        <div id="sidebar">
+            <h2>Admin Panel</h2>
+            <p style="margin-bottom: 30px;">Hoşgeldin, <span id="admin-name" style="color: var(--secondary);"></span></p>
+            <button class="nav-btn active" data-target="dashboard-section" onclick="switchSection(this)">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </button>
+            <button class="nav-btn" data-target="users-section" onclick="switchSection(this)">
+                <i class="fas fa-users"></i> Kullanıcı Yönetimi
+            </button>
+            <button class="nav-btn" data-target="transactions-section" onclick="switchSection(this)">
+                <i class="fas fa-exchange-alt"></i> İşlem Logları
+            </button>
+            <button class="nav-btn" onclick="handleLogout()" style="margin-top: auto; color: var(--danger);">
+                <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+            </button>
+        </div>
+
+        <div id="main-content">
+
+            <div id="dashboard-section" class="content-section">
+                <h2>📊 Yönetici Dashboard</h2>
+                
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <h3>Toplam Kullanıcı</h3>
+                        <p id="stat-total-users">...</p>
+                    </div>
+                    <div class="card">
+                        <h3>Banlı Kullanıcı</h3>
+                        <p id="stat-banned-users">...</p>
+                    </div>
+                    <div class="card">
+                        <h3>Toplam Token Sirkülasyonu</h3>
+                        <p id="stat-total-tokens">...</p>
+                    </div>
+                    <div class="card">
+                        <h3>Günlük Transfer Hacmi</h3>
+                        <p id="stat-daily-volume">...</p>
+                    </div>
+                </div>
+                </div>
+
+            <div id="users-section" class="content-section" style="display: none;">
+                <h2>👥 Kullanıcı Yönetimi</h2>
+                <button class="action-btn btn-primary" onclick="fetchUsers()" style="margin-bottom: 15px;">
+                    <i class="fas fa-sync-alt"></i> Yenile
+                </button>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Kullanıcı Adı</th>
+                            <th>Token</th>
+                            <th>Level</th>
+                            <th>Banlı mı?</th>
+                            <th>Admin mi?</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list-body">
+                        <tr><td colspan="7" style="text-align: center;">Yükleniyor...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="transactions-section" class="content-section" style="display: none;">
+                <h2>🔗 İşlem Logları (Transaction Log)</h2>
+                <p>Bu bölüm, `/api/admin/transactions` endpoint'inden çekilen tüm P2P transferlerini, admin müdahalelerini ve diğer finansal hareketleri gösterecektir.</p>
+                </div>
+            
+        </div>
+    </div>
+    
+    <div id="edit-user-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Kullanıcıyı Düzenle (<span id="edit-username-placeholder"></span>)</h3>
+            <label for="edit-tokens">Token Miktarı</label>
+            <input type="number" id="edit-tokens">
+            
+            <label for="edit-level">Level</label>
+            <input type="number" id="edit-level">
+            
+            <label for="edit-isadmin">Yönetici Yetkisi</label>
+            <select id="edit-isadmin">
+                <option value="false">Hayır</option>
+                <option value="true">Evet</option>
+            </select>
+            
+            <button class="modal-btn btn-primary" style="margin-right: 10px;" onclick="saveUserEdit()">Kaydet</button>
+            <button class="modal-btn btn-close" onclick="closeModal('edit-user-modal')">İptal</button>
+            <input type="hidden" id="editing-user-id">
+        </div>
+    </div>
+
+    <div id="ban-user-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Kullanıcıyı Banla (<span id="ban-username-placeholder"></span>)</h3>
+            <label for="ban-reason">Ban Sebebi</label>
+            <textarea id="ban-reason" rows="3" required></textarea>
+            
+            <label for="ban-duration">Süre (Saat, 0 = Süresiz)</label>
+            <input type="number" id="ban-duration" value="0" min="0">
+            
+            <button class="modal-btn btn-danger" style="margin-right: 10px;" onclick="executeBan()">Banla</button>
+            <button class="modal-btn btn-close" onclick="closeModal('ban-user-modal')">İptal</button>
+            <input type="hidden" id="banning-user-id">
+        </div>
+    </div>
+
+
+    <script>
+        // API URL'si ve JWT için Global Değişkenler
+        const BASE_URL = 'http://localhost:3000/api'; 
+        let ADMIN_TOKEN = localStorage.getItem('adminToken') || null;
+        let ACTIVE_USER_ID = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (ADMIN_TOKEN) {
+                // Token varsa direkt dashboard'u yüklemeyi dene
+                initializeDashboard();
+            }
+        });
+
+        // --- AUTH LOGIC ---
+        async function handleLogin() {
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            const errorElement = document.getElementById('login-error');
+
+            try {
+                const response = await fetch(`${BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Giriş başarısız. API hatası.');
+                }
+                
+                if (!data.isAdmin) {
+                    throw new Error('Yönetici yetkiniz bulunmamaktadır.');
+                }
+
+                ADMIN_TOKEN = data.token;
+                ACTIVE_USER_ID = data._id;
+                localStorage.setItem('adminToken', ADMIN_TOKEN);
+                
+                // Başarılı giriş
+                document.getElementById('admin-name').textContent = username;
+                document.getElementById('login-modal').style.display = 'none';
+                document.getElementById('app-container').style.display = 'flex';
+                initializeDashboard();
+
+            } catch (error) {
+                errorElement.textContent = error.message;
+                console.error('Giriş hatası:', error);
+            }
+        }
+        
+        function handleLogout() {
+            ADMIN_TOKEN = null;
+            localStorage.removeItem('adminToken');
+            document.getElementById('app-container').style.display = 'none';
+            document.getElementById('login-modal').style.display = 'flex';
+            document.getElementById('login-error').textContent = '';
+        }
+
+        function switchSection(button) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(button.dataset.target).style.display = 'block';
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+
+            // Kullanıcı yönetimine geçince listeyi yenile
+            if (button.dataset.target === 'users-section') {
+                fetchUsers();
+            } else if (button.dataset.target === 'dashboard-section') {
+                fetchStats();
+            }
+        }
+
+        // --- API HELPERS ---
+        async function authenticatedFetch(endpoint, options = {}) {
+            if (!ADMIN_TOKEN) {
+                handleLogout();
+                throw new Error('Token yok. Lütfen tekrar giriş yapın.');
+            }
+
+            options.headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${ADMIN_TOKEN}`,
+                'Content-Type': 'application/json'
+            };
+
+            const response = await fetch(`${BASE_URL}/admin${endpoint}`, options);
+            
+            if (response.status === 401 || response.status === 403) {
+                handleLogout();
+                throw new Error('Yetkisiz erişim. Oturum sona erdi.');
+            }
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || data.errors?.[0]?.msg || 'API isteği başarısız oldu.');
+            }
+            return data;
+        }
+
+        // --- DASHBOARD FUNCTIONS ---
+        async function initializeDashboard() {
+            if (!ADMIN_TOKEN) {
+                handleLogout();
+                return;
+            }
+            document.getElementById('login-modal').style.display = 'none';
+            document.getElementById('app-container').style.display = 'flex';
+            
+            // Kullanıcı adını JWT'den çekmek daha güvenli, şimdilik LocalStorage'dan
+            const username = document.getElementById('admin-username').value || 'Yönetici';
+            document.getElementById('admin-name').textContent = username;
+
+            fetchStats();
+        }
+
+        async function fetchStats() {
+            try {
+                const data = await authenticatedFetch('/stats');
+                
+                document.getElementById('stat-total-users').textContent = data.totalUsers.toLocaleString();
+                document.getElementById('stat-banned-users').textContent = data.bannedUsers.toLocaleString();
+                document.getElementById('stat-total-tokens').textContent = Math.floor(data.totalTokens).toLocaleString() + ' 🪙';
+                document.getElementById('stat-daily-volume').textContent = Math.floor(data.dailyTransferVolume).toLocaleString() + ' 🪙';
+
+            } catch (error) {
+                console.error('İstatistik çekme hatası:', error.message);
+                alert('İstatistikler çekilemedi: ' + error.message);
+            }
+        }
+
+        // --- USER MANAGEMENT FUNCTIONS ---
+        async function fetchUsers() {
+            const tbody = document.getElementById('user-list-body');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Yükleniyor...</td></tr>';
+
+            try {
+                const users = await authenticatedFetch('/users');
+                tbody.innerHTML = ''; // Temizle
+
+                users.forEach(user => {
+                    const row = tbody.insertRow();
+                    
+                    row.insertCell().textContent = user._id.substring(0, 8) + '...';
+                    row.insertCell().textContent = user.username;
+                    row.insertCell().textContent = user.tokens.toLocaleString();
+                    row.insertCell().textContent = user.level;
+                    row.insertCell().innerHTML = user.isBanned 
+                        ? `<span class="status-banned">EVET (${user.banReason || 'Bilinmiyor'})</span>` 
+                        : `<span class="status-active">HAYIR</span>`;
+                    row.insertCell().textContent = user.isAdmin ? 'EVET' : 'HAYIR';
+                    
+                    const actionsCell = row.insertCell();
+                    
+                    // Düzenle butonu
+                    actionsCell.innerHTML += `<button class="action-btn btn-edit" onclick="openEditModal('${user._id}', '${user.username}', ${user.tokens}, ${user.level}, ${user.isAdmin})"><i class="fas fa-edit"></i> Düzenle</button>`;
+                    
+                    // Ban/Unban butonu
+                    if (user.isBanned) {
+                        actionsCell.innerHTML += `<button class="action-btn btn-unban" onclick="executeUnban('${user._id}', '${user.username}')"><i class="fas fa-unlock"></i> Ban Kaldır</button>`;
+                    } else {
+                        actionsCell.innerHTML += `<button class="action-btn btn-ban" onclick="openBanModal('${user._id}', '${user.username}')"><i class="fas fa-ban"></i> Banla</button>`;
+                    }
+                });
+
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--danger);">Kullanıcılar çekilemedi: ${error.message}</td></tr>`;
+            }
+        }
+
+        // --- MODAL FUNCTIONS ---
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // --- EDIT MODAL ---
+        function openEditModal(id, username, tokens, level, isAdmin) {
+            document.getElementById('editing-user-id').value = id;
+            document.getElementById('edit-username-placeholder').textContent = username;
+            document.getElementById('edit-tokens').value = tokens;
+            document.getElementById('edit-level').value = level;
+            document.getElementById('edit-isadmin').value = isAdmin.toString();
+            openModal('edit-user-modal');
+        }
+
+        async function saveUserEdit() {
+            const userId = document.getElementById('editing-user-id').value;
+            const tokens = parseInt(document.getElementById('edit-tokens').value);
+            const level = parseInt(document.getElementById('edit-level').value);
+            const isAdmin = document.getElementById('edit-isadmin').value === 'true';
+
+            try {
+                const data = await authenticatedFetch(`/user/${userId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ tokens, level, isAdmin })
+                });
+
+                alert(data.message);
+                closeModal('edit-user-modal');
+                fetchUsers();
+
+            } catch (error) {
+                alert('Güncelleme başarısız: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        // --- BAN MODAL ---
+        function openBanModal(id, username) {
+            document.getElementById('banning-user-id').value = id;
+            document.getElementById('ban-username-placeholder').textContent = username;
+            document.getElementById('ban-reason').value = '';
+            document.getElementById('ban-duration').value = 0;
+            openModal('ban-user-modal');
+        }
+        
+        async function executeBan() {
+            const userId = document.getElementById('banning-user-id').value;
+            const reason = document.getElementById('ban-reason').value;
+            const durationHours = parseInt(document.getElementById('ban-duration').value);
+            
+            if (!reason) { alert('Ban sebebi gereklidir.'); return; }
+            
+            // Süreyi saatten milisaniyeye çevir
+            const durationMs = durationHours > 0 ? durationHours * 60 * 60 * 1000 : undefined; 
+
+            try {
+                const data = await authenticatedFetch('/ban', {
+                    method: 'POST',
+                    body: JSON.stringify({ userId, reason, duration: durationMs })
+                });
+
+                alert(data.message);
+                closeModal('ban-user-modal');
+                fetchUsers();
+
+            } catch (error) {
+                alert('Banlama başarısız: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        // --- UNBAN FUNCTION ---
+        async function executeUnban(userId, username) {
+            if (!confirm(`${username} kullanıcısının banını kaldırmak istediğinizden emin misiniz?`)) {
+                return;
+            }
+
+            try {
+                const data = await authenticatedFetch(`/unban/${userId}`, {
+                    method: 'DELETE'
+                });
+
+                alert(data.message);
+                fetchUsers();
+
+            } catch (error) {
+                alert('Ban kaldırma başarısız: ' + error.message);
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

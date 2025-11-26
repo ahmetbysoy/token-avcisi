@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Token Avcısı Ultimate (Mobil) - V4.0 Final</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        /* CSS RESET VE TEMEL STİLLER (V3.0'dan Korundu) */
+        :root {
+            --primary: #00ffcc;
+            --secondary: #ff00cc;
+            --bg: #111;
+            --panel-bg: rgba(0, 0, 0, 0.85);
+            --text: #fff;
+            --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --player-color: #00ffcc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            font-family: var(--font);
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        canvas { display: block; }
+
+        /* MOBİL İKON MENÜ SİSTEMİ */
+        #mobile-menu {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+        .menu-icon-btn {
+            width: 45px;
+            height: 45px;
+            background: var(--panel-bg);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: var(--primary);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+        
+        /* KAPANABİLİR PANELLER */
+        .collapsible-panel {
+            position: fixed;
+            top: 60px;
+            left: 60px;
+            background: var(--panel-bg);
+            padding: 15px;
+            border-radius: 12px;
+            max-width: 280px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            display: none; 
+            z-index: 99;
+        }
+        
+        /* Stats Paneli */
+        #stats-panel-content { top: 60px; left: 10px; width: 200px; }
+        .stat-row { display: flex; justify-content: space-between; gap: 15px; font-weight: bold; margin-bottom: 5px;}
+        .stat-val { color: var(--primary); }
+
+        /* Leaderboard Paneli */
+        #leaderboard-panel { top: 10px; right: 10px; left: auto; width: 250px; }
+        .leaderboard-title { color: #ffd700; font-size: 16px; font-weight: bold; margin-bottom: 10px; text-align: center; }
+        .leaderboard-item { display: flex; padding: 6px 8px; margin-bottom: 4px; border-radius: 6px; }
+        .leaderboard-rank { font-size: 14px; width: 25px; text-align: right; color: #ccc; }
+        .leaderboard-name { flex: 1; color: white; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .leaderboard-score { color: #ffd700; font-weight: bold; font-size: 13px; }
+
+        /* Mağaza Paneli */
+        #shop-panel { width: 300px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .shop-item { padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .shop-btn { background: var(--secondary); color: black; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .shop-cost { color: #ffd700; font-weight: bold; }
+        
+        /* TRANSFER PANELİ */
+        #transfer-panel { width: 300px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .transfer-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            background: #1a1a1a;
+            color: white;
+            font-size: 16px;
+        }
+
+        /* Boost/Ad Butonu (Sağ Alt) */
+        .ad-button { position: fixed; right: 20px; bottom: 20px; width: 80px; height: 80px; }
+        
+        /* Joystick (SOL ORTA ALT) */
+        #joystick-zone { position: fixed; bottom: 100px; left: 10px; width: 120px; height: 120px; }
+        
+        /* MODAL VE LOGIN */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); display: flex;
+            align-items: center; justify-content: center; z-index: 2000;
+        }
+        .modal-content {
+            background: #2c3e50; padding: 30px; border-radius: 15px; text-align: center;
+            max-width: 90%; width: 350px; box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+            pointer-events: auto;
+        }
+        .modal-input {
+            width: 100%; padding: 10px; margin: 15px 0; border: 2px solid var(--primary);
+            border-radius: 8px; background: #1a1a1a; color: white; font-size: 16px;
+            text-align: center;
+        }
+        .modal-btn { background: var(--primary); color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+
+        /* PET GÖRÜNÜMÜ */
+        .pet-status { position: fixed; top: 10px; right: 300px; background: var(--panel-bg); padding: 10px; border-radius: 8px; font-size: 12px; z-index: 100; }
+        .pet-status .xp-bar { width: 100%; height: 5px; background: #333; margin-top: 3px; border-radius: 2px; overflow: hidden; }
+        .pet-status .xp-fill { height: 100%; background: linear-gradient(90deg, #00ff88, #00aa44); transition: width 0.3s; }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="mobile-menu">
+        <div class="menu-icon-btn" onclick="togglePanel('stats-panel-content')"><i class="fas fa-chart-bar"></i></div>
+        <div class="menu-icon-btn" onclick="togglePanel('leaderboard-panel')"><i class="fas fa-trophy"></i></div>
+        <div class="menu-icon-btn" onclick="togglePanel('shop-panel')"><i class="fas fa-shopping-cart"></i></div>
+        <div class="menu-icon-btn" onclick="togglePanel('transfer-panel')"><i class="fas fa-exchange-alt"></i></div>
+    </div>
+    
+    <div id="stats-panel-content" class="collapsible-panel">...</div>
+    <div id="shop-panel" class="collapsible-panel">
+        <h3 style="color:var(--secondary); margin-bottom: 15px;">MAĞAZA 🛒</h3>
+        <div id="shop-items-container">Yükleniyor...</div>
+    </div>
+    
+    <div id="transfer-panel" class="collapsible-panel">
+        <h3 style="color:var(--primary); margin-bottom: 15px;">TOKEN TRANSFERİ 📤</h3>
+        <input type="text" id="transfer-username" class="transfer-input" placeholder="Alıcı Kullanıcı Adı...">
+        <input type="number" id="transfer-amount" class="transfer-input" placeholder="Miktar (Komisyon %5)">
+        <button class="modal-btn btn-primary" onclick="handleTransfer()">Gönder</button>
+        <p style="font-size: 10px; margin-top: 10px; color:#aaa;">⚠️ Sadece Token Avcısı Ultimate kullanıcı adları geçerlidir.</p>
+    </div>
+
+    <div id="leaderboard-panel" class="collapsible-panel">
+        <div class="leaderboard-title">🏆 LİDERLER</div>
+        <div id="leaderboardList"></div>
+    </div>
+
+    <div id="boost-button">
+        <i class="fas fa-arrow-up"></i>
+        <div style="font-size:10px;">BOOST</div>
+    </div>
+
+    <div id="joystick-zone">
+        <div id="joystick-knob"></div>
+    </div>
+
+    <div class="ad-button" id="adButton">
+        <div class="icon"><i class="fas fa-gift"></i></div>
+        <div class="label">SPIN</div>
+        <div class="timer" id="adTimer">BEDAVA</div>
+    </div>
+
+    <div class="pet-status" id="pet-status" style="display:none;">
+        <span id="pet-name"></span> (L<span id="pet-level"></span>)
+        <div class="xp-bar"><div id="pet-xp-fill" class="xp-fill"></div></div>
+    </div>
+
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Hoşgeldin, Avcı!</h2>
+            <p id="auth-error" style="color: #e74c3c; margin-bottom: 10px;"></p>
+            <input type="text" id="auth-username" class="modal-input" placeholder="Oyuncu Adın..." maxlength="15">
+            <input type="password" id="auth-password" class="modal-input" placeholder="Şifren..." maxlength="30">
+            <button class="modal-btn" onclick="handleAuth('login')">Giriş Yap</button>
+            <button class="modal-btn" onclick="handleAuth('register')" style="background: #3498db; margin-left: 10px;">Kayıt Ol</button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- API & JWT KONSOLİDASYONU ---
+        const BASE_URL = 'http://localhost:3000/api';
+        let JWT = localStorage.getItem('token') || null;
+        let SOCKET;
+
+        // --- GAME STATE ---
+        let state = {
+            // Statlar artık API'dan yüklenecek ve sync edilecek
+            player: { x: 4000, y: 4000, size: 20, color: '#00ffcc', speed: 5, targetX: 4000, targetY: 4000, },
+            userId: null,
+            playerName: 'Guest',
+            tokenCount: 0,
+            xp: 0,
+            level: 1,
+            speedUpgradeCount: 0,
+            penaltyFactor: 0.002,
+            isBoosting: false,
+            activePanel: null,
+            moveHistory: [],
+            sessionId: null, // Anti-Cheat için kritik
+            sessionStartTime: 0,
+            sessionFoodEaten: 0,
+            sessionXPGained: 0,
+            sessionTokensEarned: 0,
+            petCatalog: {},
+            activePetData: null,
+            // ... diğer V3.0 statları ...
+        };
+
+        // --- FETCH HELPER (JWT Entegrasyonu) ---
+        async function authenticatedFetch(endpoint, options = {}) {
+            if (!JWT) {
+                console.error("JWT mevcut değil. Kullanıcıyı login sayfasına yönlendir.");
+                // Burada oyunu durdurup login modalını açmak gerekir.
+                document.getElementById('auth-modal').style.display = 'flex';
+                throw new Error('Yetkisiz erişim. Lütfen tekrar giriş yapın.');
+            }
+
+            options.headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${JWT}`,
+                'Content-Type': 'application/json'
+            };
+
+            const response = await fetch(`${BASE_URL}${endpoint}`, options);
+            const data = await response.json();
+
+            if (response.status === 401 || response.status === 403) {
+                // JWT Süresi Doldu veya Admin Değil
+                handleLogout();
+                throw new Error(data.message || 'Oturum sona erdi.');
+            }
+            if (!response.ok) {
+                throw new Error(data.message || data.errors?.[0]?.msg || 'API isteği başarısız oldu.');
+            }
+            return data;
+        }
+
+        // --- AUTH/LOGIN LOGIC ---
+        async function handleAuth(type) {
+            const username = document.getElementById('auth-username').value;
+            const password = document.getElementById('auth-password').value;
+            const errorElement = document.getElementById('auth-error');
+            errorElement.textContent = '';
+
+            try {
+                const endpoint = type === 'login' ? '/auth/login' : '/auth/register';
+                const response = await fetch(`${BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'İşlem başarısız.');
+                }
+                
+                JWT = data.token;
+                localStorage.setItem('token', JWT);
+                state.userId = data._id;
+                state.playerName = data.username;
+                
+                document.getElementById('auth-modal').style.display = 'none';
+                
+                initializeGameWithAPI(); // Oyunu API verileriyle başlat
+
+            } catch (error) {
+                errorElement.textContent = error.message;
+                console.error('Kimlik doğrulama hatası:', error);
+            }
+        }
+        
+        function handleLogout() {
+            // Anti-Cheat: Oturumu bitirmeden çıkış yapılıyorsa oturumu sonlandır
+            if (state.sessionId) {
+                finalizeSession();
+            }
+            JWT = null;
+            localStorage.removeItem('token');
+            // Sayfayı yenile veya login modalını göster
+            window.location.reload(); 
+        }
+
+        // --- GAME INITIALIZATION ---
+        async function initializeGameWithAPI() {
+            try {
+                // 1. Kullanıcı Verilerini Çek (/game/me)
+                const userData = await authenticatedFetch('/game/me');
+                
+                // State'i Server verileriyle doldur
+                state.tokenCount = userData.tokens;
+                state.xp = userData.xp;
+                state.level = userData.level;
+                state.player.size = userData.size;
+                state.speedUpgradeCount = userData.speedUpgrade;
+                state.penaltyFactor = userData.penaltyFactor;
+                state.player.color = userData.skinColor;
+                state.activePetData = userData.activePet;
+
+                document.body.style.setProperty('--player-color', state.player.color);
+
+                // 2. Pet Kataloğunu Çek
+                const catalog = await authenticatedFetch('/shop/catalog');
+                state.petCatalog = catalog.pets;
+                
+                // 3. Oyun Motorunu Başlat
+                initGame();
+                initInputs();
+                gameLoop();
+                
+                // 4. Oturumu Başlat (Anti-Cheat)
+                startNewSession();
+                
+                // 5. Socket.io'yu Bağla
+                initSocketIO();
+
+            } catch (error) {
+                console.error('Oyun Başlatma Hatası:', error);
+                alert('Oyun başlatılamadı. Oturum sona erdi.');
+                handleLogout();
+            }
+        }
+        
+        // --- SOCKET.IO ENTEGRASYONU ---
+        function initSocketIO() {
+            if (SOCKET) return;
+
+            SOCKET = io('http://localhost:3000'); // Backend URL'si
+            
+            SOCKET.on('connect', () => {
+                console.log('[Socket] Bağlantı başarılı.');
+                // JWT'yi göndererek kimlik doğrulama yap
+                SOCKET.emit('authenticate', JWT); 
+            });
+
+            SOCKET.on('notification', (data) => {
+                // Sosyal bildirimleri işle (transfer, arkadaşlık isteği vb.)
+                console.log('[Notification]', data);
+                alert(`Yeni Bildirim (${data.type}): ${data.payload.message || data.type}`);
+                // Güncel token/statları çekmek için /game/me çağrılabilir.
+            });
+
+            SOCKET.on('announcement', (data) => {
+                // Admin duyurularını göster
+                alert(`*** DUYURU ***\n${data.message}`);
+            });
+            
+            SOCKET.on('disconnect', () => {
+                console.warn('[Socket] Bağlantı kesildi. Bildirimler durdu.');
+            });
+        }
+
+        // --- GAME LOOP & SAVE ---
+        const SAVE_INTERVAL = 15000; // 15 saniyede bir kaydet
+        setInterval(saveGameState, SAVE_INTERVAL);
+
+        async function saveGameState() {
+            if (!JWT || !state.userId) return;
+
+            // 1. Anti-Cheat Verilerini Hesapla
+            const moveVariance = calculateMovementVariance();
+            
+            // 2. Oyun Durumunu Kaydet (/game/save)
+            try {
+                const payload = {
+                    tokens: state.tokenCount,
+                    xp: state.xp,
+                    level: state.level,
+                    size: state.player.size,
+                    speedUpgrade: state.speedUpgradeCount,
+                    penaltyFactor: state.penaltyFactor,
+                    skinColor: state.player.color
+                };
+
+                const data = await authenticatedFetch('/game/save', {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                // Token geri bildirimi (opsiyonel)
+                // console.log("Oyun kaydedildi. Yeni token:", data.tokens); 
+
+            } catch (error) {
+                console.error('Kaydetme Hatası:', error.message);
+            }
+        }
+
+        // --- ANTI-CHEAT SESSION LOGIC ---
+        async function startNewSession() {
+            try {
+                const data = await authenticatedFetch('/game/session/start', { method: 'POST' });
+                state.sessionId = data.sessionId;
+                state.sessionStartTime = Date.now();
+                state.sessionFoodEaten = 0;
+                state.sessionXPGained = 0;
+                state.sessionTokensEarned = 0;
+            } catch (error) {
+                console.error('Oturum Başlatma Hatası:', error.message);
+            }
+        }
+
+        window.addEventListener('beforeunload', finalizeSession); // Sayfa kapanmadan önce
+
+        async function finalizeSession() {
+            if (!state.sessionId) return;
+            
+            // Son Anti-Cheat verilerini hesapla
+            const moveVariance = calculateMovementVariance();
+            const afkTime = Math.floor((Date.now() - state.lastInputTime) / 1000); // Basit AFK hesaplama
+
+            try {
+                const payload = {
+                    tokensEarned: state.sessionTokensEarned,
+                    xpGained: state.sessionXPGained,
+                    foodEaten: state.sessionFoodEaten,
+                    movementVariance: moveVariance,
+                    afkTime: afkTime
+                };
+                
+                await authenticatedFetch(`/game/session/end/${state.sessionId}`, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                state.sessionId = null;
+                console.log("Oturum başarıyla sonlandırıldı.");
+
+            } catch (error) {
+                console.error('Oturum Sonlandırma Hatası:', error.message);
+            }
+        }
+
+
+        // --- TRANSFER LOGIC ---
+        async function handleTransfer() {
+            const toUsername = document.getElementById('transfer-username').value;
+            const amount = parseInt(document.getElementById('transfer-amount').value);
+
+            if (amount < 10 || isNaN(amount)) {
+                alert('Transfer miktarı en az 10 olmalıdır.');
+                return;
+            }
+
+            try {
+                const data = await authenticatedFetch('/transfer/send', {
+                    method: 'POST',
+                    body: JSON.stringify({ toUsername, amount })
+                });
+
+                alert(data.message);
+                state.tokenCount = data.newBalance; // Yeni bakiyeyi güncelle
+                updateUI(); // UI'ı yenile
+                closePanel('transfer-panel');
+
+            } catch (error) {
+                alert('Transfer başarısız: ' + error.message);
+            }
+        }
+
+        // --- SHOP LOGIC (Updated to use API) ---
+        async function fetchShopItems() {
+            const container = document.getElementById('shop-items-container');
+            container.innerHTML = 'Yükleniyor...';
+            
+            try {
+                const catalog = await authenticatedFetch('/shop/catalog');
+                
+                let html = '<h4>PET SATIN AL</h4>';
+                
+                // Petleri listele
+                for (const rarity in catalog.pets) {
+                    for (const petName in catalog.pets[rarity]) {
+                        const pet = catalog.pets[rarity][petName];
+                        html += `
+                            <div class="shop-item">
+                                <span>${petName.toUpperCase()} (${pet.description})</span>
+                                <div><span class="shop-cost">${pet.price} 🪙</span> 
+                                <button class="shop-btn" onclick="buyItem('pet', '${petName}', ${pet.price})">Satın Al</button></div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Aksesuarlar da buraya eklenebilir.
+                
+                container.innerHTML = html;
+
+            } catch (error) {
+                container.innerHTML = `<p style="color:#e74c3c;">Mağaza yüklenemedi: ${error.message}</p>`;
+            }
+        }
+
+        async function buyItem(type, itemName, cost) {
+            if (state.tokenCount < cost) {
+                alert('Yetersiz Token!');
+                return;
+            }
+
+            if (!confirm(`${itemName} (${cost} Token) satın almak istediğinizden emin misiniz?`)) {
+                return;
+            }
+
+            try {
+                const data = await authenticatedFetch('/shop/buy', {
+                    method: 'POST',
+                    body: JSON.stringify({ itemType: type, itemName: itemName })
+                });
+
+                alert(data.message);
+                
+                // Statları güncelle (Basitçe, yeni token bakiyesi güncellenir)
+                state.tokenCount -= cost;
+                updateUI();
+                
+            } catch (error) {
+                alert('Satın alma başarısız: ' + error.message);
+            }
+        }
+        
+        // --- GAME MECHANICS (V3.0'dan Korundu/Adapt edildi) ---
+        // ... (CONFIG, ChunkManager, Food, BoostSystem, TokenFeed, SpinSystem, GameStats, vb. V3.0 sınıfları ve fonksiyonları buraya taşınmalıdır.)
+        // **Örn:**
+        
+        // Örnek: consumeFood fonksiyonunda Token düşürme
+        function consumeFood(food) {
+            // ... (XP ve Boyut artışı)
+
+            // Token düşürme sadece server-side yapılmalıydı. 
+            // Burada client, server'a sadece ne kadar yemek yediğini/xp kazandığını bildirir.
+            // Client'ın token count'unu artırması *gereksiz* ve *güvensizdir*.
+            // Ancak, anlık geri bildirim için:
+
+            let isTokenDrop = Math.random() < 0.1; // Sadece görsel amaçlı
+
+            if (isTokenDrop) {
+                const amount = 10;
+                state.tokenCount += amount; // Hızlı UI güncellemesi (sunucu save'de düzeltilecek)
+                state.sessionTokensEarned += amount;
+                // showFloatingToken(amount);
+            }
+            state.sessionFoodEaten++;
+            state.sessionXPGained += 10;
+        }
+
+
+        // *****************************************************************
+        // --- KOD BAŞLANGICI VE LOAD ---
+        // *****************************************************************
+
+        window.onload = function() {
+            // JWT varsa oyunu başlat, yoksa login modalını göster
+            if (JWT) {
+                // JWT'nin geçerliliğini kontrol et ve oyunu başlat
+                initializeGameWithAPI();
+            } else {
+                document.getElementById('auth-modal').style.display = 'flex';
+            }
+            resize();
+            window.addEventListener('resize', resize);
+            updateLeaderboard(); 
+        };
+        
+        // --- TEMEL UI FONKSİYONLARI (V3.0'dan korundu) ---
+        function togglePanel(panelId) { /* ... */ }
+        function closePanel(panelId) { /* ... */ }
+        function updateUI() { 
+            document.getElementById('ui-size').innerText = Math.floor(state.player.size);
+            document.getElementById('ui-token').innerText = state.tokenCount; // Server'dan gelen token
+            document.getElementById('ui-xp').innerText = Math.floor(state.xp);
+            document.getElementById('ui-level').innerText = state.level;
+            
+            // Pet UI güncelleme
+            if (state.activePetData) {
+                document.getElementById('pet-status').style.display = 'block';
+                document.getElementById('pet-name').textContent = state.activePetData.petType.toUpperCase();
+                document.getElementById('pet-level').textContent = state.activePetData.level;
+                // XP barı da PetService'den gelen requiredXP ile hesaplanmalı
+            }
+            
+            if (document.getElementById('shop-panel').style.display === 'block') {
+                fetchShopItems();
+            }
+        }
+        async function updateLeaderboard() {
+            try {
+                const leaderboard = await authenticatedFetch('/game/leaderboard');
+                // ... (HTML oluşturma ve listeleme mantığı)
+            } catch (e) { /* ... */ }
+        }
+        function resize() { /* ... */ }
+        function initGame() { /* ... */ }
+        function initInputs() { /* ... */ }
+        function gameLoop() { 
+            // ... (Oyun döngüsü, update, draw, saveGameState çağrısı)
+            requestAnimationFrame(gameLoop);
+        }
+        // ... Diğer tüm V3.0 fonksiyonları (draw, update, checkFoodCollision, vb.) buraya kopyalanmalıdır.
+        // *****************************************************************
+    </script>
+</body>
+</html>
