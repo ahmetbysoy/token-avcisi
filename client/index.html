@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Token Avcısı Ultimate (Mobil) - V4.0 Final</title>
+    <title>Token Avcısı Ultimate - V4.0 Final</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
-        /* CSS RESET VE TEMEL STİLLER (V3.0'dan Korundu) */
+        /* CSS RESET VE TEMEL STİLLER */
         :root {
             --primary: #00ffcc;
             --secondary: #ff00cc;
@@ -40,41 +40,15 @@
 
         /* MOBİL İKON MENÜ SİSTEMİ */
         #mobile-menu {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 100;
+            position: fixed; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 8px; z-index: 100;
         }
         .menu-icon-btn {
-            width: 45px;
-            height: 45px;
-            background: var(--panel-bg);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: var(--primary);
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
+            width: 45px; height: 45px; background: var(--panel-bg); border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: var(--primary); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s, transform 0.2s;
         }
         
         /* KAPANABİLİR PANELLER */
         .collapsible-panel {
-            position: fixed;
-            top: 60px;
-            left: 60px;
-            background: var(--panel-bg);
-            padding: 15px;
-            border-radius: 12px;
-            max-width: 280px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            display: none; 
-            z-index: 99;
+            position: fixed; top: 60px; left: 60px; background: var(--panel-bg); padding: 15px; border-radius: 12px; max-width: 280px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5); display: none; z-index: 99;
         }
         
         /* Stats Paneli */
@@ -99,45 +73,50 @@
         /* TRANSFER PANELİ */
         #transfer-panel { width: 300px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .transfer-input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            background: #1a1a1a;
-            color: white;
-            font-size: 16px;
+            width: 100%; padding: 10px; margin: 10px 0; border: 2px solid var(--primary);
+            border-radius: 8px; background: #1a1a1a; color: white; font-size: 16px;
         }
 
-        /* Boost/Ad Butonu (Sağ Alt) */
-        .ad-button { position: fixed; right: 20px; bottom: 20px; width: 80px; height: 80px; }
+        /* Boost/Ad Butonu */
+        .ad-button { 
+            position: fixed; right: 20px; bottom: 20px; width: 80px; height: 80px;
+            background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+            border: 4px solid #ffd700; border-radius: 50%; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); transition: all 0.3s; z-index: 100;
+        }
+        .ad-button .icon { font-size: 24px; margin-bottom: 2px; }
+        .ad-button .label { font-size: 10px; font-weight: bold; color: white; }
         
-        /* Joystick (SOL ORTA ALT) */
-        #joystick-zone { position: fixed; bottom: 100px; left: 10px; width: 120px; height: 120px; }
+        /* Joystick */
+        #joystick-zone { 
+            position: fixed; bottom: 100px; left: 10px; width: 120px; height: 120px;
+            border-radius: 50%; border: 2px dashed rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center; pointer-events: auto; z-index: 100;
+        }
+        #joystick-knob {
+            width: 50px; height: 50px; background: rgba(255, 255, 255, 0.3); border-radius: 50%; position: relative;
+        }
         
         /* MODAL VE LOGIN */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: flex;
-            align-items: center; justify-content: center; z-index: 2000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 2000;
         }
         .modal-content {
-            background: #2c3e50; padding: 30px; border-radius: 15px; text-align: center;
-            max-width: 90%; width: 350px; box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
-            pointer-events: auto;
+            background: #2c3e50; padding: 30px; border-radius: 15px; text-align: center; max-width: 90%; width: 350px; box-shadow: 0 0 20px rgba(0, 255, 204, 0.3); pointer-events: auto;
         }
         .modal-input {
-            width: 100%; padding: 10px; margin: 15px 0; border: 2px solid var(--primary);
-            border-radius: 8px; background: #1a1a1a; color: white; font-size: 16px;
-            text-align: center;
+            width: 100%; padding: 10px; margin: 15px 0; border: 2px solid var(--primary); border-radius: 8px; background: #1a1a1a; color: white; font-size: 16px; text-align: center;
         }
         .modal-btn { background: var(--primary); color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; margin-top: 15px; cursor: pointer; }
 
         /* PET GÖRÜNÜMÜ */
         .pet-status { position: fixed; top: 10px; right: 300px; background: var(--panel-bg); padding: 10px; border-radius: 8px; font-size: 12px; z-index: 100; }
-        .pet-status .xp-bar { width: 100%; height: 5px; background: #333; margin-top: 3px; border-radius: 2px; overflow: hidden; }
+        .pet-status .xp-bar { width: 100px; height: 5px; background: #333; margin-top: 3px; border-radius: 2px; overflow: hidden; }
         .pet-status .xp-fill { height: 100%; background: linear-gradient(90deg, #00ff88, #00aa44); transition: width 0.3s; }
-
+        
+        /* Floating Token */
+        .floating-token {
+            position: fixed; font-size: 28px; pointer-events: none; z-index: 200; color: #ffd700; font-weight: bold; text-shadow: 0 0 10px black; animation: float 1s ease-out forwards;
+        }
+        @keyframes float { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(1.2); } }
     </style>
 </head>
 <body>
@@ -149,9 +128,19 @@
         <div class="menu-icon-btn" onclick="togglePanel('leaderboard-panel')"><i class="fas fa-trophy"></i></div>
         <div class="menu-icon-btn" onclick="togglePanel('shop-panel')"><i class="fas fa-shopping-cart"></i></div>
         <div class="menu-icon-btn" onclick="togglePanel('transfer-panel')"><i class="fas fa-exchange-alt"></i></div>
+        <div class="menu-icon-btn" onclick="handleLogout()" style="margin-top: 20px;"><i class="fas fa-sign-out-alt"></i></div>
     </div>
     
-    <div id="stats-panel-content" class="collapsible-panel">...</div>
+    <div id="stats-panel-content" class="collapsible-panel">
+        <h3 style="color:var(--primary); margin-bottom: 10px;">OYUNCU STATLARI</h3>
+        <div class="stat-row"><span>Ad:</span> <span id="ui-name" class="stat-val">...</span></div>
+        <div class="stat-row"><span>Boyut:</span> <span id="ui-size" class="stat-val">...</span></div>
+        <div class="stat-row"><span>Hız Yükseltme:</span> <span id="ui-speed-upg" class="stat-val">...</span></div>
+        <div class="stat-row"><span>Token:</span> <span id="ui-token" class="stat-val">...</span></div>
+        <div class="stat-row"><span>XP:</span> <span id="ui-xp" class="stat-val">...</span></div>
+        <div class="stat-row"><span>Seviye:</span> <span id="ui-level" class="stat-val">...</span></div>
+    </div>
+    
     <div id="shop-panel" class="collapsible-panel">
         <h3 style="color:var(--secondary); margin-bottom: 15px;">MAĞAZA 🛒</h3>
         <div id="shop-items-container">Yükleniyor...</div>
@@ -203,14 +192,20 @@
 
 
     <script>
-        // --- API & JWT KONSOLİDASYONU ---
-        const BASE_URL = 'http://localhost:3000/api';
-        let JWT = localStorage.getItem('token') || null;
+        // *****************************************************************
+        // --- 1. API & VERCEL KONFİGÜRASYONU ---
+        // *****************************************************************
+        
+        // Vercel domain'ini buraya sabitliyoruz
+        const VERCEL_DOMAIN = 'https://token-avcisi.vercel.app'; 
+        
+        const BASE_URL = `${VERCEL_DOMAIN}/api`; 
         let SOCKET;
-
+        const SOCKET_URL = VERCEL_DOMAIN; 
+        let JWT = localStorage.getItem('token') || null;
+        
         // --- GAME STATE ---
         let state = {
-            // Statlar artık API'dan yüklenecek ve sync edilecek
             player: { x: 4000, y: 4000, size: 20, color: '#00ffcc', speed: 5, targetX: 4000, targetY: 4000, },
             userId: null,
             playerName: 'Guest',
@@ -221,22 +216,142 @@
             penaltyFactor: 0.002,
             isBoosting: false,
             activePanel: null,
+            hiddenScore: 0, 
             moveHistory: [],
-            sessionId: null, // Anti-Cheat için kritik
+            sessionId: null, 
             sessionStartTime: 0,
             sessionFoodEaten: 0,
             sessionXPGained: 0,
             sessionTokensEarned: 0,
             petCatalog: {},
             activePetData: null,
-            // ... diğer V3.0 statları ...
+            lastInputTime: Date.now(),
+            keys: {},
+            camera: { x: 0, y: 0 },
+            leaderboardData: [],
+            isSaving: false,
         };
 
-        // --- FETCH HELPER (JWT Entegrasyonu) ---
+        // --- V3.0 CONFIG ---
+        const CONFIG = {
+            mapWidth: 8000,
+            mapHeight: 8000,
+            chunkSize: 2000,
+            foodPerChunk: 150,
+            basePlayerSize: 20,
+            maxPlayerSize: 200,
+            baseSpeed: 5,
+            boostSpeedMultiplier: 1.5,
+            boostSizePenalty: 0.999,
+            tokenBaseThreshold: 100,
+            baseDropChance: 0.05,
+            xpLevelBase: 200,
+            colors: ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#33FFF2', '#F3FF33'],
+            afkTimeLimit: 30, 
+            farmVarianceThreshold: 0.3, 
+            initialPenaltyFactor: 0.002,
+        };
+        
+        // --- HTML ELEMENTLERİ ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const joystickZone = document.getElementById('joystick-zone');
+        const joystickKnob = document.getElementById('joystick-knob');
+        const boostButton = document.getElementById('boost-button');
+        
+        // --- CORE CLASSES ---
+        class ChunkManager {
+            constructor() { this.chunks = new Map(); this.activeChunks = new Set(); }
+            getChunkKey(x, y) { const chunkX = Math.floor(x / CONFIG.chunkSize); const chunkY = Math.floor(y / CONFIG.chunkSize); return `${chunkX},${chunkY}`; }
+            getChunkCoords(x, y) { return { x: Math.floor(x / CONFIG.chunkSize), y: Math.floor(y / CONFIG.chunkSize) }; }
+            generateChunk(chunkX, chunkY) {
+                const key = `${chunkX},${chunkY}`;
+                if (this.chunks.has(key)) return;
+                const foods = [];
+                const startX = chunkX * CONFIG.chunkSize;
+                const startY = chunkY * CONFIG.chunkSize;
+                for (let i = 0; i < CONFIG.foodPerChunk; i++) {
+                    const x = startX + Math.random() * CONFIG.chunkSize;
+                    const y = startY + Math.random() * CONFIG.chunkSize;
+                    foods.push(new Food(x, y));
+                }
+                this.chunks.set(key, foods);
+            }
+            updateActiveChunks(playerX, playerY) {
+                const playerChunk = this.getChunkCoords(playerX, playerY);
+                const newActiveChunks = new Set();
+                for (let dx = -1; dx <= 1; dx++) {
+                    for (let dy = -1; dy <= 1; dy++) {
+                        const key = `${playerChunk.x + dx},${playerChunk.y + dy}`;
+                        newActiveChunks.add(key);
+                        this.generateChunk(playerChunk.x + dx, playerChunk.y + dy);
+                    }
+                }
+                this.activeChunks = newActiveChunks;
+            }
+            getActiveFoods() {
+                const allFoods = [];
+                for (const key of this.activeChunks) {
+                    const foods = this.chunks.get(key);
+                    if (foods) { allFoods.push(...foods); }
+                }
+                return allFoods;
+            }
+            removeFood(food) {
+                const key = this.getChunkKey(food.x, food.y);
+                const foods = this.chunks.get(key);
+                if (foods) {
+                    const index = foods.indexOf(food);
+                    if (index > -1) { foods.splice(index, 1); }
+                }
+            }
+            respawnFood(chunkX, chunkY) {
+                const key = `${chunkX},${chunkY}`;
+                const foods = this.chunks.get(key);
+                if (foods && foods.length < CONFIG.foodPerChunk) {
+                    const startX = chunkX * CONFIG.chunkSize;
+                    const startY = chunkY * CONFIG.chunkSize;
+                    const x = startX + Math.random() * CONFIG.chunkSize;
+                    const y = startY + Math.random() * CONFIG.chunkSize;
+                    foods.push(new Food(x, y));
+                }
+            }
+        }
+        
+        class Food {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = 6;
+                this.color = CONFIG.colors[Math.floor(Math.random() * CONFIG.colors.length)];
+                this.isToken = Math.random() < CONFIG.baseDropChance; // Token olma şansı (Görsel amaçlı)
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                if (this.isToken) {
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#FFD700';
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        class BoostSystem { 
+            isActive() { return state.isBoosting; }
+        }
+
+        const chunkManager = new ChunkManager();
+        const boostSystem = new BoostSystem();
+        
+        // --- 2. API & AUTH LOGIC ---
+        
         async function authenticatedFetch(endpoint, options = {}) {
             if (!JWT) {
-                console.error("JWT mevcut değil. Kullanıcıyı login sayfasına yönlendir.");
-                // Burada oyunu durdurup login modalını açmak gerekir.
                 document.getElementById('auth-modal').style.display = 'flex';
                 throw new Error('Yetkisiz erişim. Lütfen tekrar giriş yapın.');
             }
@@ -251,7 +366,6 @@
             const data = await response.json();
 
             if (response.status === 401 || response.status === 403) {
-                // JWT Süresi Doldu veya Admin Değil
                 handleLogout();
                 throw new Error(data.message || 'Oturum sona erdi.');
             }
@@ -261,7 +375,6 @@
             return data;
         }
 
-        // --- AUTH/LOGIN LOGIC ---
         async function handleAuth(type) {
             const username = document.getElementById('auth-username').value;
             const password = document.getElementById('auth-password').value;
@@ -284,37 +397,28 @@
                 
                 JWT = data.token;
                 localStorage.setItem('token', JWT);
-                state.userId = data._id;
-                state.playerName = data.username;
                 
                 document.getElementById('auth-modal').style.display = 'none';
                 
-                initializeGameWithAPI(); // Oyunu API verileriyle başlat
+                initializeGameWithAPI();
 
             } catch (error) {
                 errorElement.textContent = error.message;
-                console.error('Kimlik doğrulama hatası:', error);
             }
         }
         
         function handleLogout() {
-            // Anti-Cheat: Oturumu bitirmeden çıkış yapılıyorsa oturumu sonlandır
-            if (state.sessionId) {
-                finalizeSession();
-            }
+            if (state.sessionId) { finalizeSession(); }
             JWT = null;
             localStorage.removeItem('token');
-            // Sayfayı yenile veya login modalını göster
             window.location.reload(); 
         }
 
-        // --- GAME INITIALIZATION ---
         async function initializeGameWithAPI() {
             try {
-                // 1. Kullanıcı Verilerini Çek (/game/me)
                 const userData = await authenticatedFetch('/game/me');
                 
-                // State'i Server verileriyle doldur
+                state.userId = userData._id;
                 state.tokenCount = userData.tokens;
                 state.xp = userData.xp;
                 state.level = userData.level;
@@ -323,71 +427,59 @@
                 state.penaltyFactor = userData.penaltyFactor;
                 state.player.color = userData.skinColor;
                 state.activePetData = userData.activePet;
+                state.playerName = userData.username;
 
                 document.body.style.setProperty('--player-color', state.player.color);
+                document.getElementById('ui-name').textContent = state.playerName;
 
-                // 2. Pet Kataloğunu Çek
                 const catalog = await authenticatedFetch('/shop/catalog');
                 state.petCatalog = catalog.pets;
                 
-                // 3. Oyun Motorunu Başlat
                 initGame();
                 initInputs();
                 gameLoop();
                 
-                // 4. Oturumu Başlat (Anti-Cheat)
                 startNewSession();
                 
-                // 5. Socket.io'yu Bağla
                 initSocketIO();
 
             } catch (error) {
-                console.error('Oyun Başlatma Hatası:', error);
-                alert('Oyun başlatılamadı. Oturum sona erdi.');
+                alert('Oyun başlatılamadı. Oturum sona erdi. ' + error.message);
                 handleLogout();
             }
         }
         
-        // --- SOCKET.IO ENTEGRASYONU ---
         function initSocketIO() {
             if (SOCKET) return;
-
-            SOCKET = io('http://localhost:3000'); // Backend URL'si
+            SOCKET = io(SOCKET_URL, {
+                transports: ['websocket'],
+                withCredentials: true 
+            }); 
             
             SOCKET.on('connect', () => {
-                console.log('[Socket] Bağlantı başarılı.');
-                // JWT'yi göndererek kimlik doğrulama yap
                 SOCKET.emit('authenticate', JWT); 
             });
 
             SOCKET.on('notification', (data) => {
-                // Sosyal bildirimleri işle (transfer, arkadaşlık isteği vb.)
-                console.log('[Notification]', data);
                 alert(`Yeni Bildirim (${data.type}): ${data.payload.message || data.type}`);
-                // Güncel token/statları çekmek için /game/me çağrılabilir.
+                updateLeaderboard(); 
             });
 
             SOCKET.on('announcement', (data) => {
-                // Admin duyurularını göster
                 alert(`*** DUYURU ***\n${data.message}`);
-            });
-            
-            SOCKET.on('disconnect', () => {
-                console.warn('[Socket] Bağlantı kesildi. Bildirimler durdu.');
             });
         }
 
         // --- GAME LOOP & SAVE ---
-        const SAVE_INTERVAL = 15000; // 15 saniyede bir kaydet
+        const SAVE_INTERVAL = 15000; 
         setInterval(saveGameState, SAVE_INTERVAL);
 
         async function saveGameState() {
-            if (!JWT || !state.userId) return;
+            if (!JWT || !state.userId || state.isSaving) return;
+            state.isSaving = true;
 
-            // 1. Anti-Cheat Verilerini Hesapla
             const moveVariance = calculateMovementVariance();
             
-            // 2. Oyun Durumunu Kaydet (/game/save)
             try {
                 const payload = {
                     tokens: state.tokenCount,
@@ -399,15 +491,15 @@
                     skinColor: state.player.color
                 };
 
-                const data = await authenticatedFetch('/game/save', {
+                await authenticatedFetch('/game/save', {
                     method: 'POST',
                     body: JSON.stringify(payload)
                 });
-                // Token geri bildirimi (opsiyonel)
-                // console.log("Oyun kaydedildi. Yeni token:", data.tokens); 
-
+                
             } catch (error) {
                 console.error('Kaydetme Hatası:', error.message);
+            } finally {
+                state.isSaving = false;
             }
         }
 
@@ -425,14 +517,13 @@
             }
         }
 
-        window.addEventListener('beforeunload', finalizeSession); // Sayfa kapanmadan önce
+        window.addEventListener('beforeunload', finalizeSession); 
 
         async function finalizeSession() {
             if (!state.sessionId) return;
             
-            // Son Anti-Cheat verilerini hesapla
             const moveVariance = calculateMovementVariance();
-            const afkTime = Math.floor((Date.now() - state.lastInputTime) / 1000); // Basit AFK hesaplama
+            const afkTime = Math.floor((Date.now() - state.lastInputTime) / 1000); 
 
             try {
                 const payload = {
@@ -449,13 +540,11 @@
                 });
 
                 state.sessionId = null;
-                console.log("Oturum başarıyla sonlandırıldı.");
 
             } catch (error) {
                 console.error('Oturum Sonlandırma Hatası:', error.message);
             }
         }
-
 
         // --- TRANSFER LOGIC ---
         async function handleTransfer() {
@@ -474,40 +563,38 @@
                 });
 
                 alert(data.message);
-                state.tokenCount = data.newBalance; // Yeni bakiyeyi güncelle
-                updateUI(); // UI'ı yenile
-                closePanel('transfer-panel');
+                state.tokenCount = data.newBalance; 
+                updateUI(); 
+                togglePanel('transfer-panel'); 
 
             } catch (error) {
                 alert('Transfer başarısız: ' + error.message);
             }
         }
 
-        // --- SHOP LOGIC (Updated to use API) ---
+        // --- SHOP LOGIC ---
         async function fetchShopItems() {
             const container = document.getElementById('shop-items-container');
             container.innerHTML = 'Yükleniyor...';
             
             try {
                 const catalog = await authenticatedFetch('/shop/catalog');
-                
                 let html = '<h4>PET SATIN AL</h4>';
                 
-                // Petleri listele
                 for (const rarity in catalog.pets) {
                     for (const petName in catalog.pets[rarity]) {
                         const pet = catalog.pets[rarity][petName];
+                        // Pet bonusunu hesapla
+                        const bonusPercent = ((pet.bonus - 1) * 100).toFixed(0); 
                         html += `
                             <div class="shop-item">
-                                <span>${petName.toUpperCase()} (${pet.description})</span>
+                                <span>${petName.toUpperCase()} (+${bonusPercent}% Token)</span>
                                 <div><span class="shop-cost">${pet.price} 🪙</span> 
                                 <button class="shop-btn" onclick="buyItem('pet', '${petName}', ${pet.price})">Satın Al</button></div>
                             </div>
                         `;
                     }
                 }
-                
-                // Aksesuarlar da buraya eklenebilir.
                 
                 container.innerHTML = html;
 
@@ -534,7 +621,6 @@
 
                 alert(data.message);
                 
-                // Statları güncelle (Basitçe, yeni token bakiyesi güncellenir)
                 state.tokenCount -= cost;
                 updateUI();
                 
@@ -543,85 +629,338 @@
             }
         }
         
-        // --- GAME MECHANICS (V3.0'dan Korundu/Adapt edildi) ---
-        // ... (CONFIG, ChunkManager, Food, BoostSystem, TokenFeed, SpinSystem, GameStats, vb. V3.0 sınıfları ve fonksiyonları buraya taşınmalıdır.)
-        // **Örn:**
-        
-        // Örnek: consumeFood fonksiyonunda Token düşürme
-        function consumeFood(food) {
-            // ... (XP ve Boyut artışı)
+        // --- 3. TEMEL OYUN FONKSİYONLARI (V3.0'dan Geri Getirildi) ---
 
-            // Token düşürme sadece server-side yapılmalıydı. 
-            // Burada client, server'a sadece ne kadar yemek yediğini/xp kazandığını bildirir.
-            // Client'ın token count'unu artırması *gereksiz* ve *güvensizdir*.
-            // Ancak, anlık geri bildirim için:
-
-            let isTokenDrop = Math.random() < 0.1; // Sadece görsel amaçlı
-
-            if (isTokenDrop) {
-                const amount = 10;
-                state.tokenCount += amount; // Hızlı UI güncellemesi (sunucu save'de düzeltilecek)
-                state.sessionTokensEarned += amount;
-                // showFloatingToken(amount);
-            }
-            state.sessionFoodEaten++;
-            state.sessionXPGained += 10;
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            state.camera.x = state.player.x - canvas.width / 2;
+            state.camera.y = state.player.y - canvas.height / 2;
         }
 
+        function initGame() {
+            resize();
+            chunkManager.updateActiveChunks(state.player.x, state.player.y);
+            state.player.speed = CONFIG.baseSpeed + (state.speedUpgradeCount * 0.5);
+        }
+        
+        // --- INPUTS & JOYSTICK ---
+        let joystickData = { active: false, x: 0, y: 0, originX: 0, originY: 0 };
+        
+        function initInputs() {
+            window.addEventListener('keydown', e => { 
+                state.keys[e.key] = true; 
+                if (e.key === ' ' || e.key === 'Shift') toggleBoost(true);
+            });
+            window.addEventListener('keyup', e => { 
+                state.keys[e.key] = false; 
+                if (e.key === ' ' || e.key === 'Shift') toggleBoost(false);
+            });
+            
+            document.getElementById('adButton').addEventListener('click', () => { alert('Spin/Reklam sistemi API gerektirir.'); });
+            
+            boostButton.addEventListener('touchstart', (e) => { e.preventDefault(); toggleBoost(true); });
+            boostButton.addEventListener('touchend', (e) => { e.preventDefault(); toggleBoost(false); });
 
+            joystickZone.addEventListener('touchstart', e => {
+                e.preventDefault();
+                let touch = e.changedTouches[0];
+                let rect = joystickZone.getBoundingClientRect();
+                joystickData.active = true;
+                joystickData.originX = rect.left + rect.width / 2;
+                joystickData.originY = rect.top + rect.height / 2;
+                updateJoystick(touch.clientX, touch.clientY);
+                state.lastInputTime = Date.now();
+            }, {passive: false});
+
+            joystickZone.addEventListener('touchmove', e => {
+                e.preventDefault();
+                if (joystickData.active) { 
+                    updateJoystick(e.changedTouches[0].clientX, e.changedTouches[0].clientY); 
+                    state.lastInputTime = Date.now();
+                }
+            }, {passive: false});
+
+            joystickZone.addEventListener('touchend', e => {
+                e.preventDefault();
+                joystickData.active = false;
+                joystickData.x = 0; joystickData.y = 0;
+                joystickKnob.style.transform = `translate(0px, 0px)`;
+                state.player.targetX = state.player.x;
+                state.player.targetY = state.player.y;
+            });
+        }
+        
+        function toggleBoost(active) {
+            if (active && state.player.size < CONFIG.basePlayerSize * 1.5) { 
+                if (!state.isBoosting) alert(`Hızlanmak için en az ${CONFIG.basePlayerSize * 1.5} boyutunda olmalısın!`);
+                return;
+            }
+            state.isBoosting = active;
+            boostButton.classList.toggle('active', active);
+        }
+
+        function updateJoystick(clientX, clientY) {
+            let dx = clientX - joystickData.originX;
+            let dy = clientY - joystickData.originY;
+            let distance = Math.hypot(dx, dy);
+            let maxDist = 35;
+
+            if (distance > maxDist) {
+                let angle = Math.atan2(dy, dx);
+                dx = Math.cos(angle) * maxDist;
+                dy = Math.sin(angle) * maxDist;
+            }
+
+            joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+            
+            joystickData.x = dx / maxDist;
+            joystickData.y = dy / maxDist;
+        }
+
+        // --- GAME LOOP ---
+        function gameLoop() {
+            update();
+            draw();
+            updateUI();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            let moveX = 0;
+            let moveY = 0;
+
+            if (state.keys['w'] || state.keys['ArrowUp']) moveY = -1;
+            if (state.keys['s'] || state.keys['ArrowDown']) moveY = 1;
+            if (state.keys['a'] || state.keys['ArrowLeft']) moveX = -1;
+            if (state.keys['d'] || state.keys['ArrowRight']) moveX = 1;
+            if (joystickData.active) { moveX = joystickData.x; moveY = joystickData.y; }
+
+            if (moveX !== 0 || moveY !== 0) {
+                state.lastInputTime = Date.now();
+                let len = Math.hypot(moveX, moveY);
+                if (len > 1) { moveX /= len; moveY /= len; }
+
+                if (Date.now() % 500 < 20) { 
+                    state.moveHistory.push({x: moveX, y: moveY});
+                    if (state.moveHistory.length > 20) state.moveHistory.shift();
+                }
+                
+                const currentSpeed = state.player.speed * (1 - (state.player.size - CONFIG.basePlayerSize) * state.penaltyFactor);
+                state.player.targetX = state.player.x + (moveX * currentSpeed * 10);
+                state.player.targetY = state.player.y + (moveY * currentSpeed * 10);
+            }
+            
+            let speed = state.player.speed * (1 - (state.player.size - CONFIG.basePlayerSize) * state.penaltyFactor);
+            if (speed < 2) speed = 2;
+
+            if (state.isBoosting) {
+                speed *= CONFIG.boostSpeedMultiplier;
+                state.player.size = Math.max(CONFIG.basePlayerSize, state.player.size * CONFIG.boostSizePenalty); 
+                if (state.player.size <= CONFIG.basePlayerSize) {
+                    toggleBoost(false);
+                }
+            } else if (state.player.size > CONFIG.basePlayerSize) {
+                state.player.size -= 0.005; 
+            }
+
+            const dx = state.player.targetX - state.player.x;
+            const dy = state.player.targetY - state.player.y;
+            const distance = Math.hypot(dx, dy);
+            
+            if (distance > speed) {
+                state.player.x += (dx / distance) * speed;
+                state.player.y += (dy / distance) * speed;
+            } else {
+                 state.player.x = state.player.targetX;
+                 state.player.y = state.player.targetY;
+            }
+
+            state.player.x = Math.max(state.player.size, Math.min(CONFIG.mapWidth - state.player.size, state.player.x));
+            state.player.y = Math.max(state.player.size, Math.min(CONFIG.mapHeight - state.player.size, state.player.y));
+
+            state.camera.x = state.player.x - canvas.width / 2;
+            state.camera.y = state.player.y - canvas.height / 2;
+
+            chunkManager.updateActiveChunks(state.player.x, state.player.y);
+            
+            checkFoodCollision();
+        }
+        
+        function checkFoodCollision() {
+            const foods = chunkManager.getActiveFoods();
+            for (let i = foods.length - 1; i >= 0; i--) {
+                let f = foods[i];
+                let dist = Math.hypot(state.player.x - f.x, state.player.y - f.y);
+                
+                if (dist < state.player.size + f.size) {
+                    consumeFood(f);
+                    chunkManager.removeFood(f);
+                    const chunkCoords = chunkManager.getChunkCoords(f.x, f.y);
+                    chunkManager.respawnFood(chunkCoords.x, chunkCoords.y);
+                }
+            }
+        }
+
+        function consumeFood(food) {
+            let xpGain = 10;
+            state.xp += xpGain;
+            state.player.size += 0.1;
+            state.player.size = Math.min(CONFIG.maxPlayerSize, state.player.size);
+
+            state.sessionFoodEaten++;
+            state.sessionXPGained += xpGain;
+
+            if (food.isToken) {
+                const amount = 10; 
+                state.tokenCount += amount; 
+                state.sessionTokensEarned += amount;
+                showFloatingToken(amount);
+            }
+        }
+        
+        function calculateMovementVariance() {
+            if (state.moveHistory.length < 10) return 1;
+            let avgX = state.moveHistory.reduce((a, b) => a + b.x, 0) / state.moveHistory.length;
+            let avgY = state.moveHistory.reduce((a, b) => a + b.y, 0) / state.moveHistory.length;
+            let varX = state.moveHistory.reduce((a, b) => a + Math.pow(b.x - avgX, 2), 0) / state.moveHistory.length;
+            let varY = state.moveHistory.reduce((a, b) => a + Math.pow(b.y - avgY, 2), 0) / state.moveHistory.length;
+            return Math.sqrt(varX + varY);
+        }
+
+        function showFloatingToken(amount) {
+            const floating = document.createElement('div');
+            floating.className = 'floating-token';
+            floating.textContent = `+${amount}🪙`;
+            floating.style.left = `${canvas.width / 2}px`;
+            floating.style.top = `${canvas.height / 2}px`;
+            document.body.appendChild(floating);
+
+            setTimeout(() => floating.remove(), 1000);
+        }
+        
+        function draw() {
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(-state.camera.x, -state.camera.y);
+            
+            // Grid Çizimi
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 0; x <= CONFIG.mapWidth; x += 100) { ctx.moveTo(x, 0); ctx.lineTo(x, CONFIG.mapHeight); }
+            for (let y = 0; y <= CONFIG.mapHeight; y += 100) { ctx.moveTo(0, y); ctx.lineTo(CONFIG.mapWidth, y); }
+            ctx.stroke();
+
+            // Yemleri Çiz
+            const foods = chunkManager.getActiveFoods();
+            for (let f of foods) {
+                f.draw();
+            }
+
+            // Oyuncuyu Çiz
+            ctx.beginPath();
+            ctx.arc(state.player.x, state.player.y, state.player.size, 0, Math.PI * 2);
+            ctx.fillStyle = state.player.color;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = state.player.color;
+            ctx.fill();
+            
+            // İsim Çiz
+            ctx.fillStyle = 'white';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.shadowBlur = 4;
+            ctx.shadowColor = 'black';
+            ctx.fillText(state.playerName, state.player.x, state.player.y - state.player.size - 10);
+
+            // Pet Çiz (basitçe oyuncu üstünde)
+            if (state.activePetData) {
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(state.player.x + state.player.size * 0.5, state.player.y - state.player.size * 0.5, state.player.size * 0.2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+            ctx.shadowBlur = 0;
+        }
+
+        // --- TEMEL UI FONKSİYONLARI ---
+        function togglePanel(panelId) { 
+            const panel = document.getElementById(panelId);
+            if (state.activePanel && state.activePanel !== panelId) {
+                document.getElementById(state.activePanel).style.display = 'none';
+            }
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+                state.activePanel = null;
+            } else {
+                panel.style.display = 'block';
+                state.activePanel = panelId;
+            }
+
+            if (panelId === 'shop-panel') { fetchShopItems(); }
+        }
+        
+        function updateUI() { 
+            document.getElementById('ui-size').innerText = Math.floor(state.player.size);
+            document.getElementById('ui-token').innerText = state.tokenCount.toLocaleString(); 
+            document.getElementById('ui-xp').innerText = Math.floor(state.xp);
+            document.getElementById('ui-level').innerText = state.level;
+            document.getElementById('ui-speed-upg').innerText = state.speedUpgradeCount;
+
+            if (state.activePetData) {
+                document.getElementById('pet-status').style.display = 'block';
+                document.getElementById('pet-name').textContent = state.activePetData.petType.toUpperCase();
+                document.getElementById('pet-level').textContent = state.activePetData.level;
+                // Pet XP Barı Güncellemesi
+                const requiredXP = 100 + (state.activePetData.level * state.activePetData.level * 20); // Server'daki PetService mantığına göre hesaplandı
+                const currentXP = state.activePetData.xp;
+                const percent = Math.min(100, (currentXP / requiredXP) * 100);
+                document.getElementById('pet-xp-fill').style.width = `${percent}%`;
+            } else {
+                document.getElementById('pet-status').style.display = 'none';
+            }
+        }
+        
+        async function updateLeaderboard() {
+            try {
+                const leaderboard = await authenticatedFetch('/game/leaderboard');
+                const listElement = document.getElementById('leaderboardList');
+                let html = "";
+                leaderboard.forEach((p, i) => {
+                    const emoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+                    const petIcon = p.activePet ? `(${p.activePet.petType})` : '';
+                    html += `
+                        <div class="leaderboard-item">
+                            <div class="leaderboard-rank">${emoji}</div>
+                            <div class="leaderboard-name" style="color:${p.skinColor || 'white'};">${p.username} ${petIcon}</div>
+                            <div class="leaderboard-score">${p.tokens.toLocaleString()} 🪙</div>
+                        </div>
+                    `;
+                });
+                listElement.innerHTML = html;
+            } catch (e) { document.getElementById('leaderboardList').innerHTML = `<div style="color:red; font-size:10px;">Liderlik çekilemedi.</div>`; }
+        }
+        
         // *****************************************************************
         // --- KOD BAŞLANGICI VE LOAD ---
         // *****************************************************************
 
         window.onload = function() {
-            // JWT varsa oyunu başlat, yoksa login modalını göster
             if (JWT) {
-                // JWT'nin geçerliliğini kontrol et ve oyunu başlat
                 initializeGameWithAPI();
             } else {
                 document.getElementById('auth-modal').style.display = 'flex';
             }
-            resize();
-            window.addEventListener('resize', resize);
-            updateLeaderboard(); 
         };
         
-        // --- TEMEL UI FONKSİYONLARI (V3.0'dan korundu) ---
-        function togglePanel(panelId) { /* ... */ }
-        function closePanel(panelId) { /* ... */ }
-        function updateUI() { 
-            document.getElementById('ui-size').innerText = Math.floor(state.player.size);
-            document.getElementById('ui-token').innerText = state.tokenCount; // Server'dan gelen token
-            document.getElementById('ui-xp').innerText = Math.floor(state.xp);
-            document.getElementById('ui-level').innerText = state.level;
-            
-            // Pet UI güncelleme
-            if (state.activePetData) {
-                document.getElementById('pet-status').style.display = 'block';
-                document.getElementById('pet-name').textContent = state.activePetData.petType.toUpperCase();
-                document.getElementById('pet-level').textContent = state.activePetData.level;
-                // XP barı da PetService'den gelen requiredXP ile hesaplanmalı
-            }
-            
-            if (document.getElementById('shop-panel').style.display === 'block') {
-                fetchShopItems();
-            }
-        }
-        async function updateLeaderboard() {
-            try {
-                const leaderboard = await authenticatedFetch('/game/leaderboard');
-                // ... (HTML oluşturma ve listeleme mantığı)
-            } catch (e) { /* ... */ }
-        }
-        function resize() { /* ... */ }
-        function initGame() { /* ... */ }
-        function initInputs() { /* ... */ }
-        function gameLoop() { 
-            // ... (Oyun döngüsü, update, draw, saveGameState çağrısı)
-            requestAnimationFrame(gameLoop);
-        }
-        // ... Diğer tüm V3.0 fonksiyonları (draw, update, checkFoodCollision, vb.) buraya kopyalanmalıdır.
-        // *****************************************************************
+        // gameLoop'un ilk çağrılması burada yapılıyor.
+        // Daha sonra requestAnimationFrame ile devam ediyor.
+        
     </script>
 </body>
 </html>
